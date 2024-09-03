@@ -192,3 +192,12 @@ function delete_efs(file_system_id)
     end
     Efs.delete_file_system(file_system_id)
 end
+
+#=
+Retrieve instance IP addresses.
+=#
+function get_ips_instance(instance_id::String)
+    public_ip = Ec2.describe_instances(Dict("InstanceId" => instance_id))["reservationSet"]["item"]["instancesSet"]["item"]["ipAddress"]
+    private_ip = Ec2.describe_instances(Dict("InstanceId" => instance_id))["reservationSet"]["item"]["instancesSet"]["item"]["privateIpAddress"]
+    Dict("public_ip" => public_ip, "private_ip" => private_ip)
+end

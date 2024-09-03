@@ -42,7 +42,7 @@ export create_cluster, delete_cluster
 export get_ips_instance
 
 function create_environment(cluster_name::String, shared_fs::Bool)
-    # Eu vou recuperar a primeira subrede e utilizá-la. Na prática não faz diferença, mas podemos depois criar uma função para escolher a subrede e VPC.
+    # Using the first available subnet.
     subnet_id = Ec2.describe_subnets()["subnetSet"]["item"][1]["subnetId"]
     println("Subnet ID: $subnet_id")
     placement_group = create_placement_group(cluster_name)
@@ -63,6 +63,7 @@ function create_environment(cluster_name::String, shared_fs::Bool)
     end
 end
 
+# The user must invoke this function with the desired Cluster Type.
 function create_cluster(cluster::Cluster)
     shared_fs = false
     if cluster isa ManagerWorkersWithSharedFS || cluster isa PeersWorkersWithSharedFS
@@ -70,25 +71,8 @@ function create_cluster(cluster::Cluster)
     end
 
     cluster.environment = create_environment(cluster.name, shared_fs)
-
     cluster.cluster_nodes = create_instances(cluster)
     cluster
-end
-
-function get_ips(cluster_handle::Cluster)
-    ips = Dict()
-    for (node, id) in cluster_handle.cluster_nodes
-        public_ip = Ec2.describe_instances(Dict("InstanceId" => id))["reservationSet"]["item"]["instancesSet"]["item"]["ipAddress"]
-        private_ip = Ec2.describe_instances(Dict("InstanceId" => id))["reservationSet"]["item"]["instancesSet"]["item"]["privateIpAddress"]
-        ips[node]=Dict("public_ip" => public_ip, "private_ip" => private_ip)
-    end
-    ips
-end
-
-function get_ips_instance(instance_id::String)
-    public_ip = Ec2.describe_instances(Dict("InstanceId" => instance_id))["reservationSet"]["item"]["instancesSet"]["item"]["ipAddress"]
-    private_ip = Ec2.describe_instances(Dict("InstanceId" => instance_id))["reservationSet"]["item"]["instancesSet"]["item"]["privateIpAddress"]
-    Dict("public_ip" => public_ip, "private_ip" => private_ip)
 end
 
 function delete_cluster(cluster_handle::Cluster)
@@ -106,6 +90,15 @@ function delete_cluster(cluster_handle::Cluster)
     end
     delete_security_group(cluster_handle.environment.security_group_id)
     delete_placement_group(cluster_handle.environment.placement_group)
+end
+
+# Get the IPs for the
+function get_ips(cluster_handle::Cluster)
+    ips = Dict()
+    for (node, id) in cluster_handle.cluster_nodes
+        ips[node] = get_ips_instance(id)
+    end
+    ips
 end
 
 end # module JuliaAWSCluster

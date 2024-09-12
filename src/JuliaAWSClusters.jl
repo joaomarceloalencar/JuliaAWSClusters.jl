@@ -85,7 +85,7 @@ function delete_cluster(cluster_handle::Cluster)
             status = get_instance_status(instance[2])
         end
     end
-    if cluster_handle isa ManagerWorkersWithSharedFS || cluster isa PeersWorkersWithSharedFS
+    if cluster_handle isa ManagerWorkersWithSharedFS || cluster_handle isa PeersWorkersWithSharedFS
         delete_efs(cluster_handle.environment.file_system_id)
     end
     delete_security_group(cluster_handle.environment.security_group_id)

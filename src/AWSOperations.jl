@@ -64,10 +64,10 @@ Instances
 function create_instances(cluster::Cluster)
     cluster_nodes = Dict()
 
-    # Configurando a conexão SSH.
+    # Setting up SSH connection.
     internal_key_name, user_data = set_up_ssh_connection(cluster.name)
 
-    # Configuração do NFS
+    # Setting up NFS.
     if cluster isa ManagerWorkersWithSharedFS || cluster isa PeersWorkersWithSharedFS
         file_system_ip = cluster.environment.file_system_ip
         nfs_user_data = "apt-get -y install nfs-common

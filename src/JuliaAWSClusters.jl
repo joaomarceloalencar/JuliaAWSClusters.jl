@@ -39,7 +39,7 @@ include("AWSOperations.jl")
 
 export ManagerWorkersWithoutSharedFS, ManagerWorkersWithSharedFS, PeersWorkersWithoutSharedFS, PeersWorkersWithSharedFS
 export create_cluster, delete_cluster
-export get_ips
+export get_ips, get_instance_status, get_instance_check
 
 function create_environment(cluster_name::String, shared_fs::Bool)
     # Using the first available subnet.

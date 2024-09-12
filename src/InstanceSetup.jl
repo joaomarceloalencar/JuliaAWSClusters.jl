@@ -56,14 +56,6 @@ function remove_temp_files(internal_key_name)
 end
  
 function set_hostfile(cluster_nodes, internal_key_name)
-    # Esperando todo mundo estar pronto.
-    for instance in keys(cluster_nodes)
-        while get_instance_status(cluster_nodes[instance]) != "running"
-            println("Waiting for $instance to be running...")
-            sleep(5)
-        end
-    end
-
     # Testando se a conexão SSH está ativa.
     for instance in keys(cluster_nodes)
         public_ip = Ec2.describe_instances(Dict("InstanceId" => cluster_nodes[instance]))["reservationSet"]["item"]["instancesSet"]["item"]["ipAddress"]

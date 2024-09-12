@@ -118,6 +118,22 @@ chown -R ubuntu:ubuntu /home/ubuntu/shared
         end
     end   
 
+    # Verify if instances are running.
+    for instance in keys(cluster_nodes)
+        while get_instance_status(cluster_nodes[instance]) != "running"
+            println("Waiting for $instance to be running...")
+            sleep(5)
+        end
+    end
+
+    # Verify if instances have passed the tests.
+    for instance in keys(cluster_nodes)
+        while get_instance_check(cluster_nodes[instance]) != "ok"
+            println("Waiting for $instance to pass the tests...")
+            sleep(5)
+        end
+    end
+
     set_hostfile(cluster_nodes, internal_key_name)
 
     remove_temp_files(internal_key_name)
@@ -136,6 +152,11 @@ function get_instance_status(id)
     description["reservationSet"]["item"]["instancesSet"]["item"]["instanceState"]["name"]
 end
 
+function get_instance_check(id)
+    description = Ec2.describe_instance_status(Dict("InstanceId" => id))
+    description["instanceStatusSet"]["item"]["instanceStatus"]["status"]
+end
+
 function get_instance_subnet(id)
     description = Ec2.describe_instances(Dict("InstanceId" => id))
     description["reservationSet"]["item"]["instancesSet"]["item"]["subnetId"]
@@ -144,7 +165,6 @@ end
 #=
 Shared File System
 =#
-
 function create_efs(subnet_id, security_group_id)
     chars = ['a':'z'; 'A':'Z'; '0':'9']
     creation_token = join(chars[Random.rand(1:length(chars), 64)])

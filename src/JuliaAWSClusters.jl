@@ -1,4 +1,4 @@
-module JuliaAWSCluster
+module JuliaAWSClusters
 
 # Fixing AWS.jl parameter names
 using AWS
@@ -39,7 +39,7 @@ include("AWSOperations.jl")
 
 export ManagerWorkersWithoutSharedFS, ManagerWorkersWithSharedFS, PeersWorkersWithoutSharedFS, PeersWorkersWithSharedFS
 export create_cluster, delete_cluster
-export get_ips_instance
+export get_ips
 
 function create_environment(cluster_name::String, shared_fs::Bool)
     # Using the first available subnet.

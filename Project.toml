@@ -1,4 +1,4 @@
-name = "JuliaAWSCluster"
+name = "JuliaAWSClusters"
 uuid = "e562eb6d-da85-41c1-8c38-5f4cefee6435"
 authors = ["jmhal "]
 version = "0.1.0"

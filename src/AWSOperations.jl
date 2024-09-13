@@ -13,7 +13,18 @@ function create_placement_group(name)
                           Dict("Key" => "Name", "Value" => name)]
             )
         )
-    Ec2.create_placement_group(params)["placementGroup"]["groupName"]
+   
+    try
+        Ec2.create_placement_group(params)["placementGroup"]["groupName"]
+    catch e
+        if (e.code == "InvalidPlacementGroup.Duplicate")
+            println("Placement group already exists... skipping creating a new one.")
+        else
+            println("Unable to create placement group.")
+            println(e)
+        end
+    end
+    name
 end
 
 function delete_placement_group(name)
@@ -25,7 +36,7 @@ end
 Security Group 
 =#
 function create_security_group(name, description)
-    # Criamos o grupo
+    # Create the group
     params = Dict(
         "TagSpecification" => 
             Dict(
@@ -34,9 +45,22 @@ function create_security_group(name, description)
                           Dict("Key" => "Name", "Value" => name)]
             )
     )
-    id = Ec2.create_security_group(name, description, params)["groupId"]
+    
+    id = ""
+    try
+        id = Ec2.create_security_group(name, description, params)["groupId"]
+    catch e
+        if (e.code == "InvalidGroup.Duplicate")
+            println("Security group already exists... skipping creating a new one.")
+            id = Ec2.describe_security_groups(Dict("GroupName" => name))["securityGroupInfo"]["item"]["groupId"]
+            println("Using security group with id: $id")
+        else
+            println("Unable to create security group.")
+            println(e)
+        end
+    end
 
-    # Liberamos o SSH.
+    # Allow SSH.
     params = Dict(
         "GroupId" => id, 
         "CidrIp" => "0.0.0.0/0",
@@ -45,7 +69,7 @@ function create_security_group(name, description)
         "ToPort" => 22)
     Ec2.authorize_security_group_ingress(params)
 
-    # Liberamos o tráfego interno do grupo.
+    # Allow internal traffic.
     sg_name =  Ec2.describe_security_groups(Dict("GroupId" => id))["securityGroupInfo"]["item"]["groupName"]
     params = Dict(
         "GroupId" => id, 

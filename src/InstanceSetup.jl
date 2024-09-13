@@ -1,6 +1,6 @@
 # Auxiliary Functions.
 function set_up_ssh_connection(cluster_name)
-   # Criar chave interna pública e privada do SSH.
+   # Create internal ssh key.
    chars = ['a':'z'; 'A':'Z'; '0':'9']
    random_suffix = join(chars[Random.rand(1:length(chars), 5)])
    internal_key_name = cluster_name * random_suffix
@@ -8,7 +8,7 @@ function set_up_ssh_connection(cluster_name)
    private_key = base64encode(read("/tmp/$internal_key_name", String))
    public_key = base64encode(read("/tmp/$internal_key_name.pub", String))
   
-   # Define o script que irá instalar a chave pública e privada no headnode e workers.
+   # Script to install key on nodes.
    user_data = "#!/bin/bash
 echo $private_key | base64 -d > /home/ubuntu/.ssh/$cluster_name
 echo $public_key | base64 -d > /home/ubuntu/.ssh/$cluster_name.pub
@@ -16,8 +16,12 @@ echo 'Host *
    IdentityFile /home/ubuntu/.ssh/$cluster_name
    StrictHostKeyChecking no' > /home/ubuntu/.ssh/config
 cat /home/ubuntu/.ssh/$cluster_name.pub >> /home/ubuntu/.ssh/authorized_keys
-chown -R ubuntu.ubuntu /home/ubuntu/.ssh
+chown -R ubuntu:ubuntu /home/ubuntu/.ssh
 chmod 600 /home/ubuntu/.ssh/*
+sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 1000/g' /etc/ssh/sshd_config
+sed -i 's/#ClientAliveCountMax 3/ClientAliveCountMax 100/g' /etc/ssh/sshd_config
+systemctl restart ssh
+echo \"Finished SSH configuration.\"
 "
    [internal_key_name, user_data]
 end

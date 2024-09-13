@@ -46,6 +46,7 @@ function create_environment(cluster_name::String, shared_fs::Bool)
     subnet_id = Ec2.describe_subnets()["subnetSet"]["item"][1]["subnetId"]
     println("Subnet ID: $subnet_id")
     placement_group = create_placement_group(cluster_name)
+        
     println("Placement Group: $placement_group")
     security_group_id = create_security_group(cluster_name, "Grupo $cluster_name")
     println("Security Group ID: $security_group_id")

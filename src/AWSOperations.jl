@@ -54,6 +54,7 @@ function create_security_group(name, description)
             println("Security group already exists... skipping creating a new one.")
             id = Ec2.describe_security_groups(Dict("GroupName" => name))["securityGroupInfo"]["item"]["groupId"]
             println("Using security group with id: $id")
+            return id
         else
             println("Unable to create security group.")
             println(e)

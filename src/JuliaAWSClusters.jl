@@ -48,7 +48,7 @@ function create_environment(cluster_name::String, shared_fs::Bool)
     placement_group = create_placement_group(cluster_name)
         
     println("Placement Group: $placement_group")
-    security_group_id = create_security_group(cluster_name, "Grupo $cluster_name")
+    security_group_id = create_security_group(cluster_name, "$cluster_name")
     println("Security Group ID: $security_group_id")
 
     if (shared_fs)

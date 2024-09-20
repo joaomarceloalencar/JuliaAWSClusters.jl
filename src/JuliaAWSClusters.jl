@@ -38,7 +38,7 @@ include("InstanceSetup.jl")
 include("AWSOperations.jl")
 
 export ManagerWorkersWithoutSharedFS, ManagerWorkersWithSharedFS, PeersWorkersWithoutSharedFS, PeersWorkersWithSharedFS
-export create_cluster, delete_cluster
+export create_cluster, delete_cluster, interrupt_cluster, resume_cluster
 export get_ips, get_instance_status, get_instance_check
 
 function create_environment(cluster_name::String, shared_fs::Bool)
@@ -91,6 +91,16 @@ function delete_cluster(cluster_handle::Cluster)
     end
     delete_security_group(cluster_handle.environment.security_group_id)
     delete_placement_group(cluster_handle.environment.placement_group)
+end
+
+function interrupt_cluster(cluster_handle::Cluster)
+    stop_instances(cluster_handle.cluster_nodes)
+    println("Cluster interrupted.")
+end
+
+function resume_cluster(cluster_handle::Cluster)
+    start_instances(cluster_handle.cluster_nodes)
+    println("Cluster resumed.")
 end
 
 # Get the IPs for the

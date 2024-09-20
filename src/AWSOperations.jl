@@ -172,6 +172,19 @@ function delete_instances(cluster_nodes)
     end
 end
 
+function stop_instances(cluster_nodes)
+    for id in values(cluster_nodes)
+        Ec2.stop_instances(id)
+    end
+end
+
+function start_instances(cluster_nodes)
+    for id in values(cluster_nodes)
+        Ec2.start_instances(id)
+    end
+end
+
+
 function get_instance_status(id)
     description = Ec2.describe_instances(Dict("InstanceId" => id))
     description["reservationSet"]["item"]["instancesSet"]["item"]["instanceState"]["name"]
